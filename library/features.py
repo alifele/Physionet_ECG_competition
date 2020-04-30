@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.signal import argrelexterma
 
 def diff(data):
   return data[1:] - data[:-1]
