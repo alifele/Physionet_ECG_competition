@@ -1,4 +1,5 @@
 from scipy.io import loadmat
+import numpy as np
 
 global Age, Sex, D, D_list, Sex_list, fs
 Sex = 14
@@ -10,6 +11,7 @@ D_list = ['AF', 'I-AVB', 'LBBB', 'Normal',
 Sex_list = ['Female','Male']
 
 
+############################################
 
 def data_loader(file_name, file_path = 'Training_WFDB/'):
 
@@ -32,10 +34,10 @@ def data_loader(file_name, file_path = 'Training_WFDB/'):
   '''
 
 
-  data = loadmat('Training_WFDB/A6349.mat')['val']
+  data = loadmat('Training_WFDB/'+file_name)['val']
   return data.T
 
-
+#####################################################
 def Get_Info(file_name, file_path='Training_WFDB/', encoded = True):
   with open(file_path + file_name) as f:
     lines = f.readlines()
@@ -47,11 +49,45 @@ def Get_Info(file_name, file_path='Training_WFDB/', encoded = True):
   d = lines[D]
 
   if encoded == True:
-    return age, sex_encoder(sex), disease_encoder(d)
+    if age != 'Na' and sex != 'Na':
+      return [int(age), int(sex_encoder(sex)), int(disease_encoder(d))]
+    
+    else:
+      return [40, 1, int(disease_encoder(d))]
+
 
 
   return age, sex, d
 
+
+#######################################################
+def batch_loader(names, encoded_info = True):
+
+  '''
+
+  give this function the names of the data that you want to
+  fetch. this function will return the desired data with 
+  its info
+
+  Note that the data will be encoded
+
+  '''
+
+  data = []
+  info = []
+
+  for name in names:
+    data.append(data_loader(name + '.mat'))
+    info.append(Get_Info(name + '.hea', encoded = encoded_info))
+
+
+  #data = np.array(data)
+  #info = np.array(info)
+
+  return data, info
+
+
+######################################################
 
 
 '''
@@ -76,24 +112,26 @@ Sex:
  1 --> Male
 
 '''
-
+##########################################
 def disease_encoder(d_info):
   for index, elem in enumerate(D_list):
     if elem in d_info:
       return index
 
 
+##########################################
 
 def sex_encoder(age_info):
   for index, elem in enumerate(Sex_list):
     if elem in age_info:
       return index
+##########################################
 
 def disease_decoder(disease_number):
   return D_list[disease_number]
 
+  
+##########################################
+
 def sex_decoder(sex_number):
   return Sex_list[sex_number]
-
-
-  
